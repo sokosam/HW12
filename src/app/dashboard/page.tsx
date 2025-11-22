@@ -1,14 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { mockServers, mockIncidents } from "~/lib/mock-data";
+import { useState } from "react";
+import { useEffect } from "react";
+import type { Server, Incident } from "~/lib/mock-data";
 
 export default function DashboardPage() {
-  // INTEGRATION: Replace with tRPC call
-  // const { data: servers } = api.servers.getAll.useQuery();
-  // const { data: incidents } = api.incidents.getAll.useQuery();
-  const servers = mockServers;
-  const incidents = mockIncidents;
+  const [servers, setServers] = useState<Server[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch servers
+        const serversRes = await fetch('/api/servers');
+        if (!serversRes.ok) throw new Error('Failed to fetch servers');
+        const serversData = await serversRes.json();
+        setServers(serversData);
+
+        // Fetch errors/incidents
+        const errorsRes = await fetch('/api/error');
+        if (!errorsRes.ok) throw new Error('Failed to fetch errors');
+        const errorsData = await errorsRes.json();
+
+        // Transform errors to incidents format
+        const incidentsData: Incident[] = errorsData.map((incident: any) => ({
+          id: incident.id.toString(),
+          serverId: incident.serverId?.toString() ?? "unknown",
+          serverName: incident.serverName ?? "Unknown server",
+          timestamp: new Date(incident.timestamp),
+          logs: incident.logs ?? "",
+          aiSummary: incident.aiSummary ?? "",
+          aiFix: incident.aiFix ?? "",
+          resolved: incident.resolved ?? false,
+        }));
+
+        setIncidents(incidentsData);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
+  
 
   const activeServers = servers.filter((s) => s.status === "running").length;
   const crashedServers = servers.filter((s) => s.status === "crashed").length;
@@ -21,15 +65,38 @@ export default function DashboardPage() {
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 5);
 
+  if (isLoading) {
+    return (
+      <div className="mx-52 flex items-center justify-center py-12">
+        <p className="text-[#8b949e]">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-52 flex items-center justify-center py-12">
+        <p className="text-[#f85149]">Error: {error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-52 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
-        {/* INTEGRATION: Replace with tRPC mutation */}
         <button
-          onClick={() => {
-            // api.stressTest.run.mutate();
-            alert("Stress test triggered - INTEGRATION: Connect to tRPC");
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/stress-test', {
+                method: 'POST',
+              });
+              if (!response.ok) throw new Error('Failed to trigger stress test');
+              alert('Stress test triggered successfully');
+            } catch (err) {
+              console.error('Error triggering stress test:', err);
+              alert('Failed to trigger stress test');
+            }
           }}
           className="rounded-lg bg-gradient-to-r from-[#f85149] to-[#da3633] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20"
         >
@@ -262,14 +329,22 @@ export default function DashboardPage() {
                     <span>Memory: {server.memory.toFixed(1)}%</span>
                   </div>
                 </div>
-                {/* INTEGRATION: Replace with tRPC mutation */}
                 <button
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    // api.servers.reset.mutate({ serverId: server.id });
-                    alert(
-                      `Reset ${server.name} - INTEGRATION: Connect to tRPC`,
-                    );
+                    try {
+                      const response = await fetch(`/api/servers/${server.id}/reset`, {
+                        method: 'POST',
+                      });
+                      if (!response.ok) throw new Error('Failed to reset server');
+                      // Refresh servers list
+                      const serversRes = await fetch('/api/servers');
+                      const serversData = await serversRes.json();
+                      setServers(serversData);
+                    } catch (err) {
+                      console.error('Error resetting server:', err);
+                      alert(`Failed to reset ${server.name}`);
+                    }
                   }}
                   className="rounded-lg bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] px-3 py-1.5 text-xs font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20"
                 >

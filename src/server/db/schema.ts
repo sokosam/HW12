@@ -51,10 +51,12 @@ export const statuses = createTable("status", (d) => ({
 
 export const errors = createTable("error", (d) => ({
   id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+  agentId: d.varchar({ length: 256 }).notNull(),
   containerId: d
     .integer()
     .notNull()
     .references(() => containers.id, { onDelete: "cascade" }),
+  serviceName: d.varchar({ length: 256 }).default("unknown").notNull(),
   errorMessage: d.varchar({ length: 1024 }).notNull(),
   explaination: d.varchar({ length: 2048 }).notNull(),
   suggestedFix: d.varchar({ length: 2048 }).notNull(),
