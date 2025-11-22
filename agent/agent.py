@@ -18,7 +18,7 @@ class GeminiResponse(BaseModel):
 
 gemini_api = os.environ.get("GENAI_API_KEY")
 backend_route = os.environ.get("AGENT_BACKEND_URL")
-agent_id = os.environ.get("AGENT_ID")
+agent_id = int(os.environ.get("AGENT_ID"))
 
 # File extensions to include when analyzing repo
 CODE_EXTENSIONS = {'.py', '.js', '.ts', '.tsx', '.jsx', '.java', '.cpp', '.c', '.h', 
