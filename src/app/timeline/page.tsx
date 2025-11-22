@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { mockTimelineEvents, type TimelineEvent } from "~/lib/mock-data";
+import { PageTransition } from "../_components/page-transition";
 
 export default function TimelinePage() {
   // INTEGRATION: Replace with tRPC call
@@ -123,153 +124,157 @@ export default function TimelinePage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#f0f6fc]">Timeline</h1>
-        {/* INTEGRATION: Replace with tRPC subscription for real-time updates */}
-        <button
-          onClick={() => {
-            // Real-time updates would come from tRPC subscription
-            alert(
-              "Timeline updates automatically - INTEGRATION: Add tRPC subscription",
-            );
-          }}
-          className="rounded-lg bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20"
-        >
-          Refresh
-        </button>
-      </div>
-
-      {/* Time Range Scrubber */}
-      <div className="card p-6">
-        <h2 className="mb-4 text-sm font-medium text-[#f0f6fc]">Time Range</h2>
-        <div className="flex items-center space-x-4">
-          <input
-            type="datetime-local"
-            value={timeRange.start.toISOString().slice(0, 16)}
-            onChange={(e) =>
-              setTimeRange({ ...timeRange, start: new Date(e.target.value) })
-            }
-            className="rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#f0f6fc] focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] focus:outline-none"
-          />
-          <span className="text-[#8b949e]">to</span>
-          <input
-            type="datetime-local"
-            value={timeRange.end.toISOString().slice(0, 16)}
-            onChange={(e) =>
-              setTimeRange({ ...timeRange, end: new Date(e.target.value) })
-            }
-            className="rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#f0f6fc] focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] focus:outline-none"
-          />
+    <PageTransition>
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-[#f0f6fc]">Timeline</h1>
+          {/* INTEGRATION: Replace with tRPC subscription for real-time updates */}
           <button
             onClick={() => {
-              setTimeRange({
-                start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                end: new Date(),
-              });
-              setSelectedDate(null);
+              // Real-time updates would come from tRPC subscription
+              alert(
+                "Timeline updates automatically - INTEGRATION: Add tRPC subscription",
+              );
             }}
-            className="rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-2 text-sm font-medium text-[#c9d1d9] transition-colors hover:bg-[#30363d]"
+            className="rounded-lg bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20"
           >
-            Reset
+            Refresh
           </button>
         </div>
-      </div>
 
-      {/* Date Scrubber */}
-      <div className="card p-6">
-        <h2 className="mb-4 text-sm font-medium text-[#f0f6fc]">
-          Jump to Date
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {allDates.slice(0, 10).map((date) => {
-            const dateStr = date.toDateString();
-            const isSelected = selectedDate?.toDateString() === dateStr;
-            return (
-              <button
-                key={dateStr}
-                onClick={() => {
-                  setSelectedDate(date);
-                  setTimeRange({
-                    start: new Date(date.setHours(0, 0, 0, 0)),
-                    end: new Date(date.setHours(23, 59, 59, 999)),
-                  });
-                }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                  isSelected
-                    ? "bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] text-white shadow-lg shadow-blue-500/20"
-                    : "border border-[#30363d] bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
-                }`}
-              >
-                {date.toLocaleDateString()}
-              </button>
-            );
-          })}
+        {/* Time Range Scrubber */}
+        <div className="card p-6">
+          <h2 className="mb-4 text-sm font-medium text-[#f0f6fc]">
+            Time Range
+          </h2>
+          <div className="flex items-center space-x-4">
+            <input
+              type="datetime-local"
+              value={timeRange.start.toISOString().slice(0, 16)}
+              onChange={(e) =>
+                setTimeRange({ ...timeRange, start: new Date(e.target.value) })
+              }
+              className="rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#f0f6fc] focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] focus:outline-none"
+            />
+            <span className="text-[#8b949e]">to</span>
+            <input
+              type="datetime-local"
+              value={timeRange.end.toISOString().slice(0, 16)}
+              onChange={(e) =>
+                setTimeRange({ ...timeRange, end: new Date(e.target.value) })
+              }
+              className="rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#f0f6fc] focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] focus:outline-none"
+            />
+            <button
+              onClick={() => {
+                setTimeRange({
+                  start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                  end: new Date(),
+                });
+                setSelectedDate(null);
+              }}
+              className="rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-2 text-sm font-medium text-[#c9d1d9] transition-colors hover:bg-[#30363d]"
+            >
+              Reset
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Timeline Events */}
-      <div className="space-y-6">
-        {Array.from(eventsByDate.entries())
-          .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-          .map(([dateStr, dayEvents]) => {
-            const date = new Date(dateStr);
-            const dayFilteredEvents = dayEvents.filter((event) =>
-              filteredEvents.includes(event),
-            );
+        {/* Date Scrubber */}
+        <div className="card p-6">
+          <h2 className="mb-4 text-sm font-medium text-[#f0f6fc]">
+            Jump to Date
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {allDates.slice(0, 10).map((date) => {
+              const dateStr = date.toDateString();
+              const isSelected = selectedDate?.toDateString() === dateStr;
+              return (
+                <button
+                  key={dateStr}
+                  onClick={() => {
+                    setSelectedDate(date);
+                    setTimeRange({
+                      start: new Date(date.setHours(0, 0, 0, 0)),
+                      end: new Date(date.setHours(23, 59, 59, 999)),
+                    });
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
+                    isSelected
+                      ? "bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] text-white shadow-lg shadow-blue-500/20"
+                      : "border border-[#30363d] bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
+                  }`}
+                >
+                  {date.toLocaleDateString()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            if (dayFilteredEvents.length === 0) return null;
+        {/* Timeline Events */}
+        <div className="space-y-6">
+          {Array.from(eventsByDate.entries())
+            .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+            .map(([dateStr, dayEvents]) => {
+              const date = new Date(dateStr);
+              const dayFilteredEvents = dayEvents.filter((event) =>
+                filteredEvents.includes(event),
+              );
 
-            return (
-              <div key={dateStr} className="card">
-                <div className="border-b border-[#30363d] px-6 py-4">
-                  <h2 className="text-lg font-semibold text-[#f0f6fc]">
-                    {date.toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </h2>
-                </div>
-                <div className="divide-y divide-[#30363d]">
-                  {dayFilteredEvents
-                    .sort(
-                      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
-                    )
-                    .map((event) => (
-                      <div key={event.id} className="px-6 py-4">
-                        <div className="flex items-start space-x-4">
-                          {getEventIcon(event.type)}
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm font-medium text-[#f0f6fc]">
-                                {event.title}
+              if (dayFilteredEvents.length === 0) return null;
+
+              return (
+                <div key={dateStr} className="card">
+                  <div className="border-b border-[#30363d] px-6 py-4">
+                    <h2 className="text-lg font-semibold text-[#f0f6fc]">
+                      {date.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </h2>
+                  </div>
+                  <div className="divide-y divide-[#30363d]">
+                    {dayFilteredEvents
+                      .sort(
+                        (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+                      )
+                      .map((event) => (
+                        <div key={event.id} className="px-6 py-4">
+                          <div className="flex items-start space-x-4">
+                            {getEventIcon(event.type)}
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <p className="text-sm font-medium text-[#f0f6fc]">
+                                  {event.title}
+                                </p>
+                                <span className="text-xs text-[#8b949e]">
+                                  {event.timestamp.toLocaleTimeString()}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-sm text-[#c9d1d9]">
+                                {event.description}
                               </p>
-                              <span className="text-xs text-[#8b949e]">
-                                {event.timestamp.toLocaleTimeString()}
-                              </span>
                             </div>
-                            <p className="mt-1 text-sm text-[#c9d1d9]">
-                              {event.description}
-                            </p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-      </div>
-
-      {filteredEvents.length === 0 && (
-        <div className="card p-12 text-center">
-          <p className="text-[#8b949e]">
-            No events found in the selected time range
-          </p>
+              );
+            })}
         </div>
-      )}
-    </div>
+
+        {filteredEvents.length === 0 && (
+          <div className="card p-12 text-center">
+            <p className="text-[#8b949e]">
+              No events found in the selected time range
+            </p>
+          </div>
+        )}
+      </div>
+    </PageTransition>
   );
 }
