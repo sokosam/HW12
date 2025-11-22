@@ -1,35 +1,14 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-
 import { db } from "~/server/db";
 import * as schema from "~/server/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
 
-export async function POST(
-  _request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
-  try {
-    const { id } = await context.params;
-    const [server] = await db
-      .select()
-      .from(schema.containers)
-      .where(eq(schema.containers.id, Number.parseInt(id, 10)));
-
-    if (!server) {
-      return NextResponse.json({ error: "Server not found" }, { status: 404 });
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+    try {
+        const server = await db.select().from(schema.containers).where(eq(schema.containers.id, parseInt(params.id)));
+        return NextResponse.json(server, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
-
-    // INTEGRATION: Trigger agent reset webhook here
-
-    return NextResponse.json(
-      { message: `Reset triggered for server ${server.name}` },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
 }

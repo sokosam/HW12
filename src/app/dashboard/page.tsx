@@ -25,23 +25,33 @@ export default function DashboardPage() {
         setServers(serversData);
 
         // Fetch errors/incidents
-        const errorsRes = await fetch("/api/error");
-        if (!errorsRes.ok) throw new Error("Failed to fetch errors");
-        const errorsData = await errorsRes.json();
+        try {
+          const errorsRes = await fetch("/api/error");
+          if (!errorsRes.ok) {
+            const errorData = await errorsRes.json().catch(() => ({}));
+            console.error("Error API response:", errorsRes.status, errorData);
+            throw new Error(`Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`);
+          }
+          const errorsData = await errorsRes.json();
 
-        // Transform errors to incidents format
-        const incidentsData: Incident[] = errorsData.map((incident: any) => ({
-          id: incident.id.toString(),
-          serverId: incident.serverId?.toString() ?? "unknown",
-          serverName: incident.serverName ?? "Unknown server",
-          timestamp: new Date(incident.timestamp),
-          logs: incident.logs ?? "",
-          aiSummary: incident.aiSummary ?? "",
-          aiFix: incident.aiFix ?? "",
-          resolved: incident.resolved ?? false,
-        }));
+          // Transform errors to incidents format (matching database schema)
+          const incidentsData: Incident[] = errorsData.map((error: any) => ({
+            id: error.id?.toString() ?? "unknown",
+            serverId: error.containerId?.toString() ?? "unknown",
+            serverName: error.serviceName ?? "Unknown server",
+            timestamp: new Date(error.occurredAt),
+            logs: error.errorMessage ?? "",
+            aiSummary: error.explaination ?? "",
+            aiFix: error.suggestedFix ?? "",
+            resolved: false, // Schema doesn't have resolved field yet
+          }));
 
-        setIncidents(incidentsData);
+          setIncidents(incidentsData);
+        } catch (errorErr) {
+          console.error("Error fetching incidents:", errorErr);
+          // Set empty array instead of breaking the whole page
+          setIncidents([]);
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "Failed to load data");
@@ -83,7 +93,7 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div className="mx-52 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-6">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
           <button
             onClick={async () => {
@@ -244,7 +254,7 @@ export default function DashboardPage() {
               recentIncidents.map((incident) => (
                 <Link
                   key={incident.id}
-                  href={`/incidents/${incident.id}`}
+                  href={`/error/${incident.id}`}
                   className="block px-6 py-4 transition-colors hover:bg-[#1f2937]"
                 >
                   <div className="flex items-center justify-between">

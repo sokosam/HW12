@@ -1,25 +1,96 @@
 "use client";
 
 import Link from "next/link";
-import { mockServers } from "~/lib/mock-data";
+import { useEffect, useState } from "react";
+import type { Server } from "~/lib/mock-data";
 import { PageTransition } from "../_components/page-transition";
 
 export default function ServersPage() {
-  // INTEGRATION: Replace with tRPC call
-  // const { data: servers } = api.servers.getAll.useQuery();
-  const servers = mockServers;
+  const [servers, setServers] = useState<Server[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchServers = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/servers");
+      if (!response.ok) throw new Error("Failed to fetch servers");
+
+      const serversData = await response.json();
+      setServers(serversData);
+    } catch (err) {
+      console.error("Error fetching servers:", err);
+      setError(err instanceof Error ? err.message : "Failed to load servers");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServers();
+  }, []);
+
+  const handleRefresh = async () => {
+    try {
+      const response = await fetch("/api/servers/refresh", { method: "POST" });
+      if (!response.ok) throw new Error("Failed to refresh servers");
+
+      await fetchServers(); // Refresh the list
+      alert("Servers refreshed successfully");
+    } catch (err) {
+      console.error("Error refreshing servers:", err);
+      alert("Failed to refresh servers");
+    }
+  };
+
+  const handleReset = async (serverId: string, serverName: string) => {
+    try {
+      const response = await fetch(`/api/servers/${serverId}/reset`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to reset server");
+
+      await fetchServers(); // Refresh the list
+      alert(`Server ${serverName} reset successfully`);
+    } catch (err) {
+      console.error("Error resetting server:", err);
+      alert(`Failed to reset ${serverName}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <PageTransition>
+        <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-[#8b949e]">Loading servers...</p>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageTransition>
+        <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-[#f85149]">Error: {error}</p>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-6">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Servers</h1>
-          {/* INTEGRATION: Replace with tRPC mutation */}
           <button
-            onClick={() => {
-              // api.servers.refresh.mutate();
-              alert("Refreshing servers - INTEGRATION: Connect to tRPC");
-            }}
+            onClick={handleRefresh}
             className="rounded-lg bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20"
           >
             Refresh
@@ -138,14 +209,8 @@ export default function ServersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          {/* INTEGRATION: Replace with tRPC mutation */}
                           <button
-                            onClick={() => {
-                              // api.servers.reset.mutate({ serverId: server.id });
-                              alert(
-                                `Reset ${server.name} - INTEGRATION: Connect to tRPC`,
-                              );
-                            }}
+                            onClick={() => handleReset(server.id, server.name)}
                             className="text-[#58a6ff] transition-colors hover:text-[#79c0ff]"
                           >
                             Reset

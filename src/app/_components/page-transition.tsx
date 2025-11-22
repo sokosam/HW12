@@ -18,7 +18,7 @@ export function PageTransition({
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
-    // Fade in when component mounts
+    // Slide in when component mounts
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 10);
@@ -54,12 +54,13 @@ export function PageTransition({
         </div>
       )}
 
-      {/* Page content with fade animation */}
+      {/* Page content with slide-in animation */}
       <div
         className={`page-transition-enter flex flex-1 ${className}`}
         style={{
           opacity: isVisible ? 1 : 0,
-          transition: `opacity ${duration}ms ease-in-out`,
+          transform: isVisible ? "translateY(0) translateX(0)" : "translateY(16px) translateX(-8px)",
+          transition: `opacity ${duration}ms cubic-bezier(0.4, 0, 0.2, 1), transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
         }}
       >
         {children}

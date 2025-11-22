@@ -61,8 +61,8 @@ export default function OrgsPage() {
 
   return (
     <PageTransition>
-      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pt-6 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between pt-6">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Organizations</h1>
           <button
             onClick={() => setShowCreateModal(true)}

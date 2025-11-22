@@ -30,18 +30,41 @@ export function Navigation() {
                 const isActive =
                   pathname === item.href ||
                   pathname?.startsWith(item.href + "/");
+                
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
-                      isActive
-                        ? "border border-[#30363d] bg-[#1f2937] text-[#58a6ff]"
-                        : "text-[#c9d1d9] hover:bg-[#1f2937] hover:text-[#f0f6fc]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
+                  <SignedIn key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? "border border-[#30363d] bg-[#1f2937] text-[#58a6ff]"
+                          : "text-[#c9d1d9] hover:bg-[#1f2937] hover:text-[#f0f6fc]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </SignedIn>
+                );
+              })}
+              {navItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  pathname?.startsWith(item.href + "/");
+                
+                return (
+                  <SignedOut key={item.href}>
+                    <SignInButton mode="modal">
+                      <button
+                        className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                          isActive
+                            ? "border border-[#30363d] bg-[#1f2937] text-[#58a6ff]"
+                            : "text-[#c9d1d9] hover:bg-[#1f2937] hover:text-[#f0f6fc]"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
                 );
               })}
             </div>
