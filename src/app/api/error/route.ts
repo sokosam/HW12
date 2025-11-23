@@ -14,6 +14,8 @@ export async function GET(_request: Request) {
         explaination: schema.errors.explaination,
         suggestedFix: schema.errors.suggestedFix,
         occurredAt: schema.errors.occurredAt,
+        resolved: schema.errors.resolved,
+        resolvedAt: schema.errors.resolvedAt,
         containerName: schema.containers.name,
       })
       .from(schema.errors)
@@ -31,7 +33,7 @@ export async function GET(_request: Request) {
       logs: record.errorMessage,
       aiSummary: record.explaination,
       aiFix: record.suggestedFix,
-      resolved: false,
+      resolved: record.resolved,
     }));
 
     return NextResponse.json(incidents, { status: 200 });

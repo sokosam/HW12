@@ -62,6 +62,8 @@ export const errors = createTable("error", (d) => ({
     .timestamp({ withTimezone: true })
     .default(sql`NOW()`)
     .notNull(),
+  resolved: d.boolean().default(false).notNull(),
+  resolvedAt: d.timestamp({ withTimezone: true }),
 }));
 
 // User and organization tables might not be necessary lets wait for clerk auth implementation first
