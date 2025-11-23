@@ -101,7 +101,7 @@ export async function POST(request: Request) {
           const call = await twilioClient.calls.create({
             to: env.ALERT_PHONE_NUMBER,
             from: env.TWILIO_PHONE_NUMBER,
-            url: `http://twimlets.com/message?Message=${encodeURIComponent(alertMessage)}`,
+            url: `https://twimlets.com/message?Message=${encodeURIComponent(alertMessage)}`,
           });
 
           callSid = call.sid;

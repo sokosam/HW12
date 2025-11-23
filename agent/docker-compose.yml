@@ -11,23 +11,62 @@ services:
       - internal
     restart: always
 
-  app:
-    image: alpine
-    command: sleep infinity
+  demo-database:
+    image: postgres:15-alpine
+    container_name: demo-database
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - internal
-    restart: always
 
-  demo-app:
-    build: ../../HW12-demo
-    container_name: agent-demo-app-1
+  demo-backend:
+    build:
+      context: ./repo
+      dockerfile: Dockerfile.backend
+    container_name: demo-backend
     restart: "no"
+    ports:
+      - "5001:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - DATABASE_URL=postgresql://app_user:app_password@demo-database:5432/app_db
+      - GIT_REPO_URL=https://github.com/sokosam/HW12-demo
+    depends_on:
+      demo-database:
+        condition: service_healthy
+    networks:
+      - internal
+
+  demo-frontend:
+    build:
+      context: ./repo
+      dockerfile: Dockerfile.frontend
+    container_name: demo-frontend
+    restart: "no"
+    ports:
+      - "3001:3000"
     environment:
       - PYTHONUNBUFFERED=1
       - GIT_REPO_URL=https://github.com/sokosam/HW12-demo
+    depends_on:
+      - demo-backend
     networks:
       - internal
 
 networks:
   internal:
     driver: bridge
+
+volumes:
+  db_data:

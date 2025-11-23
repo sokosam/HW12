@@ -252,7 +252,10 @@ def heartbeat():
 
 
 
-TARGETS = ["agent-app-1", "agent-demo-app-1"]  # container names
+# Get target containers from environment variable
+TARGETS = os.environ.get("TARGET_CONTAINERS", "demo-backend,demo-frontend").split(",")
+TARGETS = [name.strip() for name in TARGETS]  # Remove any whitespace
+print(f"Monitoring containers: {TARGETS}")
 
 # Track restart counts to detect exits
 restart_counts = {}
