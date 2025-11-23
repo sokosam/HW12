@@ -1,70 +1,83 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Server, Incident } from "~/lib/mock-data";
 import { PageTransition } from "../_components/page-transition";
 import { TrendGraph } from "~/app/_components/trend-graph";
 import { IncidentTimeline } from "~/app/_components/incident-timeline";
 import { mockServers, mockIncidents } from "~/lib/mock-data";
+import { useDataUpdates } from "~/hooks/use-data-updates";
 
 export default function DashboardPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch servers
+      const serversRes = await fetch("/api/servers");
+      if (!serversRes.ok) throw new Error("Failed to fetch servers");
+      const serversData = await serversRes.json();
+      setServers(serversData);
+
+      // Fetch errors/incidents
+      try {
+        const errorsRes = await fetch("/api/error");
+        if (!errorsRes.ok) {
+          const errorData = await errorsRes.json().catch(() => ({}));
+          console.error("Error API response:", errorsRes.status, errorData);
+          throw new Error(
+            `Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`,
+          );
+        }
+        const errorsData = await errorsRes.json();
+
+        // Transform errors to incidents format (matching database schema)
+        const incidentsData: Incident[] = errorsData.map((error: any) => ({
+          id: error.id?.toString() ?? "unknown",
+          serverId: error.containerId?.toString() ?? "unknown",
+          serverName: error.serviceName ?? "Unknown server",
+          timestamp: new Date(error.occurredAt),
+          logs: error.errorMessage ?? "",
+          aiSummary: error.explaination ?? "",
+          aiFix: error.suggestedFix ?? "",
+          resolved: error.resolved ?? false,
+        }));
+
+        setIncidents(incidentsData);
+      } catch (errorErr) {
+        console.error("Error fetching incidents:", errorErr);
+        // Set empty array instead of breaking the whole page
+        setIncidents([]);
+      }
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Handle real-time updates
+  const handleUpdate = useCallback(() => {
+    console.log("🔔 Real-time update triggered!");
+    setLastUpdate(new Date());
+    fetchData();
+  }, [fetchData]);
+
+  // Listen for real-time updates
+  const { isConnected } = useDataUpdates(handleUpdate);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Fetch servers
-        const serversRes = await fetch("/api/servers");
-        if (!serversRes.ok) throw new Error("Failed to fetch servers");
-        const serversData = await serversRes.json();
-        setServers(serversData);
-
-        // Fetch errors/incidents
-        try {
-          const errorsRes = await fetch("/api/error");
-          if (!errorsRes.ok) {
-            const errorData = await errorsRes.json().catch(() => ({}));
-            console.error("Error API response:", errorsRes.status, errorData);
-            throw new Error(`Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`);
-          }
-          const errorsData = await errorsRes.json();
-
-          // Transform errors to incidents format (matching database schema)
-          const incidentsData: Incident[] = errorsData.map((error: any) => ({
-            id: error.id?.toString() ?? "unknown",
-            serverId: error.containerId?.toString() ?? "unknown",
-            serverName: error.serviceName ?? "Unknown server",
-            timestamp: new Date(error.occurredAt),
-            logs: error.errorMessage ?? "",
-            aiSummary: error.explaination ?? "",
-            aiFix: error.suggestedFix ?? "",
-            resolved: error.resolved ?? false,
-          }));
-
-          setIncidents(incidentsData);
-        } catch (errorErr) {
-          console.error("Error fetching incidents:", errorErr);
-          // Set empty array instead of breaking the whole page
-          setIncidents([]);
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err instanceof Error ? err.message : "Failed to load data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const activeServers = servers.filter((s) => s.status === "running").length;
   const crashedServers = servers.filter((s) => s.status === "crashed").length;
@@ -97,7 +110,38 @@ export default function DashboardPage() {
     <PageTransition>
       <div className="mx-52 space-y-6">
         <div className="flex items-center justify-between pt-6">
-          <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
+            {isConnected && (
+              <div className="flex items-center gap-2 rounded-full bg-[#1c2128] px-3 py-1.5 text-xs">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#3fb950]" />
+                <span className="text-[#8b949e]">Live</span>
+              </div>
+            )}
+            {lastUpdate && (
+              <span className="text-xs text-[#8b949e]">
+                Updated {lastUpdate.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                const response = await fetch("/api/stress-test", {
+                  method: "POST",
+                });
+                if (!response.ok)
+                  throw new Error("Failed to trigger stress test");
+                alert("Stress test triggered successfully");
+              } catch (err) {
+                console.error("Error triggering stress test:", err);
+                alert("Failed to trigger stress test");
+              }
+            }}
+            className="rounded-lg bg-gradient-to-r from-[#f85149] to-[#da3633] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20"
+          >
+            Run Stress Test
+          </button>
         </div>
         <TrendGraph incidents={incidents} />
 
@@ -201,9 +245,7 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-[#8b949e]">
-                Errors Today
-              </p>
+              <p className="text-sm font-medium text-[#8b949e]">Errors Today</p>
               <p className="text-2xl font-semibold text-[#f0f6fc]">
                 {errorsToday}
               </p>
