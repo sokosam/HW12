@@ -68,7 +68,14 @@ export async function POST(request: Request) {
           apiKey: env.ELEVENLABS_API_KEY,
         });
 
-        const alertMessage = `Alert: Container ${payload.containerId} has encountered an error. ${errorMessage}.`;
+        // Strip ANSI escape codes and other control characters from error message
+        const cleanErrorMessage = errorMessage.replace(
+          // eslint-disable-next-line no-control-regex
+          /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
+          "",
+        );
+
+        const alertMessage = `Alert: Container ${payload.containerId} has encountered an error. ${cleanErrorMessage}.`;
 
         const audioStream = await elevenlabs.textToSpeech.convert(
           "21m00Tcm4TlvDq8ikWAM", // Rachel voice ID
