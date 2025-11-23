@@ -16,7 +16,7 @@ export default function DashboardPage() {
     (i) => i.timestamp.getTime() > Date.now() - 86400000
   ).length;
 
-  const recentIncidents = incidents
+  const recentIncidents = [...incidents]
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 5);
 
