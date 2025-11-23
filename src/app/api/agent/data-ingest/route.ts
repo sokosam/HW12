@@ -5,7 +5,7 @@ import { db } from "~/server/db";
 import * as schema from "~/server/db/schema";
 
 const ingestPayload = z.object({
-  agentId: z.string().min(1),
+  agentId: z.number().int().positive(),
   containerId: z.number().int().positive(),
   serviceName: z.string().min(1),
   errorMessage: z.string().min(1).optional(),

@@ -152,7 +152,7 @@ async function seedHistoricalIncidents() {
         : null;
 
       await db.insert(schema.errors).values({
-        containerId,
+        containerId: containerId,
         agentId: incident.agentId,
         serviceName: incident.serviceName,
         errorMessage: incident.errorMessage,

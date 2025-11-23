@@ -51,7 +51,7 @@ export const statuses = createTable("status", (d) => ({
 
 export const errors = createTable("error", (d) => ({
   id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-  agentId: d.varchar({ length: 256 }).notNull(),
+  agentId: d.integer().notNull(),
   containerId: d
     .integer()
     .notNull()
