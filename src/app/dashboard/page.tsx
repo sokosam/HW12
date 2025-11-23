@@ -98,24 +98,6 @@ export default function DashboardPage() {
       <div className="mx-52 space-y-6">
         <div className="flex items-center justify-between pt-6">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
-          <button
-            onClick={async () => {
-              try {
-                const response = await fetch("/api/stress-test", {
-                  method: "POST",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to trigger stress test");
-                alert("Stress test triggered successfully");
-              } catch (err) {
-                console.error("Error triggering stress test:", err);
-                alert("Failed to trigger stress test");
-              }
-            }}
-            className="rounded-lg bg-gradient-to-r from-[#f85149] to-[#da3633] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20"
-          >
-            Run Stress Test
-          </button>
         </div>
         <TrendGraph incidents={incidents} />
 
@@ -124,123 +106,107 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="card p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#58a6ff]/30 bg-gradient-to-br from-[#58a6ff]/20 to-[#bc8cff]/20">
-                  <svg
-                    className="h-6 w-6 text-[#58a6ff]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-[#8b949e]">
-                  Active Servers
-                </p>
-                <p className="text-2xl font-semibold text-[#f0f6fc]">
-                  {activeServers}
-                </p>
-              </div>
+          <div className="card flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#58a6ff]/30 bg-gradient-to-br from-[#58a6ff]/20 to-[#bc8cff]/20">
+              <svg
+                className="h-6 w-6 text-[#58a6ff]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-[#8b949e]">
+                Active Servers
+              </p>
+              <p className="text-2xl font-semibold text-[#f0f6fc]">
+                {activeServers}
+              </p>
             </div>
           </div>
 
-          <div className="card p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#f85149]/30 bg-gradient-to-br from-[#f85149]/20 to-[#da3633]/20">
-                  <svg
-                    className="h-6 w-6 text-[#f85149]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-[#8b949e]">
-                  Crashed Servers
-                </p>
-                <p className="text-2xl font-semibold text-[#f0f6fc]">
-                  {crashedServers}
-                </p>
-              </div>
+          <div className="card flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#f85149]/30 bg-gradient-to-br from-[#f85149]/20 to-[#da3633]/20">
+              <svg
+                className="h-6 w-6 text-[#f85149]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-[#8b949e]">
+                Crashed Servers
+              </p>
+              <p className="text-2xl font-semibold text-[#f0f6fc]">
+                {crashedServers}
+              </p>
             </div>
           </div>
 
-          <div className="card p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#d29922]/30 bg-gradient-to-br from-[#d29922]/20 to-[#bb8009]/20">
-                  <svg
-                    className="h-6 w-6 text-[#d29922]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-[#8b949e]">
-                  Unresolved Incidents
-                </p>
-                <p className="text-2xl font-semibold text-[#f0f6fc]">
-                  {unresolvedIncidents}
-                </p>
-              </div>
+          <div className="card flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#d29922]/30 bg-gradient-to-br from-[#d29922]/20 to-[#bb8009]/20">
+              <svg
+                className="h-6 w-6 text-[#d29922]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-[#8b949e]">
+                Unresolved Incidents
+              </p>
+              <p className="text-2xl font-semibold text-[#f0f6fc]">
+                {unresolvedIncidents}
+              </p>
             </div>
           </div>
 
-          <div className="card p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#30363d] bg-gradient-to-br from-[#30363d]/50 to-[#21262d]/50">
-                  <svg
-                    className="h-6 w-6 text-[#c9d1d9]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-[#8b949e]">
-                  Errors Today
-                </p>
-                <p className="text-2xl font-semibold text-[#f0f6fc]">
-                  {errorsToday}
-                </p>
-              </div>
+          <div className="card flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#30363d] bg-gradient-to-br from-[#30363d]/50 to-[#21262d]/50">
+              <svg
+                className="h-6 w-6 text-[#c9d1d9]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-[#8b949e]">
+                Errors Today
+              </p>
+              <p className="text-2xl font-semibold text-[#f0f6fc]">
+                {errorsToday}
+              </p>
             </div>
           </div>
         </div>

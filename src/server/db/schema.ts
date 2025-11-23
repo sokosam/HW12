@@ -68,4 +68,15 @@ export const errors = createTable("error", (d) => ({
     .notNull(),
 }));
 
+export const users = createTable("user", (d) => ({
+  id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+  email: d.varchar({ length: 256 }).notNull(),
+  name: d.varchar({ length: 256 }).notNull(),
+  phoneNumber: d.varchar({ length: 256 }).notNull(),
+  createdAt: d
+    .timestamp({ withTimezone: true })
+    .default(sql`NOW()`)
+    .notNull(),
+}));
 // User and organization tables might not be necessary lets wait for clerk auth implementation first
+

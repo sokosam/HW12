@@ -248,19 +248,13 @@ export interface TimelineEvent {
   type: "error" | "deployment" | "incident" | "info";
 }
 
-export interface Org {
+export interface User {
   id: string;
+  email: string;
   name: string;
-  members: OrgMember[];
+  phoneNumber: string;
 }
 
-export interface OrgMember {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  role: "admin" | "member";
-}
 
 // Helper to generate "X days ago" dates for the uptime graph
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -465,25 +459,25 @@ export const mockTimelineEvents: TimelineEvent[] = [
   },
 ];
 
-export const mockOrgs: Org[] = [
-  {
-    id: "org-1",
-    name: "Platform Engineering",
-    members: [
-      {
-        id: "m-1",
-        userId: "user-1",
-        userName: "Alice Smith",
-        userEmail: "alice@example.com",
-        role: "admin",
-      },
-      {
-        id: "m-2",
-        userId: "user-2",
-        userName: "Bob Johnson",
-        userEmail: "bob@example.com",
-        role: "member",
-      },
-    ],
-  },
-];
+// export const mockOrgs: Org[] = [
+//   {
+//     id: "org-1",
+//     name: "Platform Engineering",
+//     members: [
+//       {
+//         id: "m-1",
+//         userId: "user-1",
+//         userName: "Alice Smith",
+//         userEmail: "alice@example.com",
+//         role: "admin",
+//       },
+//       {
+//         id: "m-2",
+//         userId: "user-2",
+//         userName: "Bob Johnson",
+//         userEmail: "bob@example.com",
+//         role: "member",
+//       },
+//     ],
+//   },
+// ];

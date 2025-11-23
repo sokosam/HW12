@@ -8,7 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/servers", label: "Servers" },
   { href: "/timeline", label: "Timeline" },
-  { href: "/orgs", label: "Organizations" },
+  { href: "/user", label: "Users" },
 ];
 
 export function Navigation() {
