@@ -6,7 +6,6 @@ import type { Server, Incident } from "~/lib/mock-data";
 import { PageTransition } from "../_components/page-transition";
 import { TrendGraph } from "~/app/_components/trend-graph";
 import { IncidentTimeline } from "~/app/_components/incident-timeline";
-import { mockServers, mockIncidents } from "~/lib/mock-data";
 import { useDataUpdates } from "~/hooks/use-data-updates";
 
 export default function DashboardPage() {
@@ -124,24 +123,6 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <button
-            onClick={async () => {
-              try {
-                const response = await fetch("/api/stress-test", {
-                  method: "POST",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to trigger stress test");
-                alert("Stress test triggered successfully");
-              } catch (err) {
-                console.error("Error triggering stress test:", err);
-                alert("Failed to trigger stress test");
-              }
-            }}
-            className="rounded-lg bg-gradient-to-r from-[#f85149] to-[#da3633] px-4 py-2 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20"
-          >
-            Run Stress Test
-          </button>
         </div>
         <TrendGraph incidents={incidents} />
 

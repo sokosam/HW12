@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     start(controller) {
       // Send initial connection message
       controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify({ type: "connected" })}\n\n`)
+        encoder.encode(`data: ${JSON.stringify({ type: "connected" })}\n\n`),
       );
       console.log("SSE: Sent connected message to client");
 
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
         try {
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: "data-update", timestamp: Date.now() })}\n\n`
-            )
+              `data: ${JSON.stringify({ type: "data-update", timestamp: Date.now() })}\n\n`,
+            ),
           );
         } catch (error) {
           console.error("SSE: Error sending update:", error);

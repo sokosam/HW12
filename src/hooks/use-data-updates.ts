@@ -27,7 +27,7 @@ export function useDataUpdates(onUpdate: () => void) {
       console.log("📨 SSE message received:", event.data);
       try {
         const data = JSON.parse(event.data);
-        
+
         if (data.type === "connected") {
           console.log("Connected to SSE server");
         } else if (data.type === "data-update") {
@@ -43,7 +43,7 @@ export function useDataUpdates(onUpdate: () => void) {
       console.error("❌ SSE connection error:", error);
       setIsConnected(false);
       eventSource.close();
-      
+
       // Reconnect after 5 seconds
       setTimeout(() => {
         console.log("🔄 Attempting to reconnect...");

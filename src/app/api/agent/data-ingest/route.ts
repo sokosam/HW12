@@ -59,7 +59,11 @@ export async function POST(request: Request) {
     let callSid = null;
 
     try {
-      if (env.ELEVENLABS_API_KEY && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN) {
+      if (
+        env.ELEVENLABS_API_KEY &&
+        env.TWILIO_ACCOUNT_SID &&
+        env.TWILIO_AUTH_TOKEN
+      ) {
         const elevenlabs = new ElevenLabsClient({
           apiKey: env.ELEVENLABS_API_KEY,
         });
@@ -89,7 +93,10 @@ export async function POST(request: Request) {
 
         // Make Twilio call if credentials are configured
         if (env.ALERT_PHONE_NUMBER && env.TWILIO_PHONE_NUMBER) {
-          const twilioClient = twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
+          const twilioClient = twilio(
+            env.TWILIO_ACCOUNT_SID,
+            env.TWILIO_AUTH_TOKEN,
+          );
 
           const call = await twilioClient.calls.create({
             to: env.ALERT_PHONE_NUMBER,
@@ -104,7 +111,10 @@ export async function POST(request: Request) {
         console.log("ElevenLabs/Twilio not configured, skipping notifications");
       }
     } catch (notificationError) {
-      console.error("Error sending notifications (non-fatal):", notificationError);
+      console.error(
+        "Error sending notifications (non-fatal):",
+        notificationError,
+      );
       // Don't fail the whole request if notifications fail
     }
 
