@@ -51,7 +51,7 @@ export const statuses = createTable("status", (d) => ({
 
 export const errors = createTable("error", (d) => ({
   id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-  agentId: d.integer().notNull(),
+  agentId: d.varchar({ length: 256 }).notNull(),
   containerId: d
     .integer()
     .notNull()
@@ -66,8 +66,6 @@ export const errors = createTable("error", (d) => ({
     .timestamp({ withTimezone: true })
     .default(sql`NOW()`)
     .notNull(),
-  resolved: d.boolean().default(false).notNull(),
-  resolvedAt: d.timestamp({ withTimezone: true }),
 }));
 
 // User and organization tables might not be necessary lets wait for clerk auth implementation first
