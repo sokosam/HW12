@@ -5,33 +5,29 @@ import type { Incident } from "~/lib/mock-data";
 
 type IncidentTimelineProps = {
   incidents: Incident[];
+  days?: number; // default 90, must match TrendGraph's window
 };
 
-export function IncidentTimeline({ incidents }: IncidentTimelineProps) {
+export function IncidentTimeline({
+  incidents,
+  days = 90,
+}: IncidentTimelineProps) {
   const [selectedIncident, setSelectedIncident] =
     React.useState<Incident | null>(null);
 
-  // Group incidents by calendar day (only days that actually have incidents)
-  const daysWithIncidents = React.useMemo(() => {
-    const map = new Map<string, { date: Date; incidents: Incident[] }>();
+  // Build fixed window + bucket incidents by day
+  const dayBuckets = React.useMemo(() => {
+    const allDays = getLastNDays(days); // oldest → newest
+    const map = groupIncidentsByDay(incidents);
 
-    for (const incident of incidents) {
-      const d = new Date(incident.timestamp);
-      d.setHours(0, 0, 0, 0);
-      const key = dayKey(d);
-
-      if (!map.has(key)) {
-        map.set(key, { date: d, incidents: [incident] });
-      } else {
-        map.get(key)!.incidents.push(incident);
-      }
-    }
-
-    // sort days chronologically
-    return Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime()
-    );
-  }, [incidents]);
+    return allDays.map((date) => {
+      const key = dayKey(date);
+      return {
+        date,
+        incidents: map.get(key) ?? [],
+      };
+    });
+  }, [incidents, days]);
 
   return (
     <div className="card p-6">
@@ -39,50 +35,59 @@ export function IncidentTimeline({ incidents }: IncidentTimelineProps) {
         Incident Timeline
       </h2>
 
-      {/* compact timeline, similar height to original */}
+      {/* main timeline – height kept small like your original */}
       <div className="relative h-24">
-        {/* single horizontal axis */}
+        {/* horizontal axis */}
         <div className="absolute left-4 right-4 top-4 h-px bg-[#30363d]" />
 
-        {/* each day with incidents gets a stem + dots, spaced evenly */}
-        <div className="relative flex h-full items-start justify-between px-4">
-          {daysWithIncidents.map(({ date, incidents: dayIncidents }) => (
-            <div
-              key={dayKey(date)}
-              className="flex flex-col items-center text-xs"
-            >
-              {/* hanging stem + dots */}
-              <div className="mt-4 flex flex-col items-center">
-                <div className="relative h-16 w-px bg-[#30363d]">
-                  <div className="absolute left-1/2 top-0 flex -translate-x-1/2 flex-col items-center gap-3">
-                    {dayIncidents.map((incident) => (
-                      <button
-                        key={incident.id}
-                        type="button"
-                        className="h-3 w-3 rounded-full border border-[#f85149] bg-[#da3633] shadow-sm hover:scale-110 focus:outline-none focus:ring-1 focus:ring-[#f85149]"
-                        title={`${incident.serverName} – ${incident.timestamp.toLocaleString()}`}
-                        onClick={() => setSelectedIncident(incident)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+        {/* 90 equal columns – must match the graph's day layout */}
+        <div
+          className="relative flex h-full items-start px-4"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${days}, minmax(0, 1fr))`,
+          }}
+        >
+          {dayBuckets.map(({ date, incidents: dayIncidents }) => {
+            const hasIncidents = dayIncidents.length > 0;
 
-              {/* date label under stem */}
-              <span className="mt-2 text-[11px] text-[#8b949e]">
-                {formatDayLabel(date)}
-              </span>
-            </div>
-          ))}
+            return (
+              <div
+                key={dayKey(date)}
+                className="flex flex-col items-center text-[10px]"
+              >
+                {/* tiny tick on axis for every day (optional) */}
+                <div className="h-3 w-px bg-[#30363d]" />
+
+                {/* only show stem + dots when there are incidents */}
+                {hasIncidents && (
+                  <div className="mt-1 flex flex-col items-center">
+                    <div className="relative h-16 w-px bg-[#30363d]">
+                      <div className="absolute left-1/2 top-0 flex -translate-x-1/2 flex-col items-center gap-3">
+                        {dayIncidents.map((incident) => (
+                          <button
+                            key={incident.id}
+                            type="button"
+                            className="h-3 w-3 rounded-full border border-[#f85149] bg-[#da3633] shadow-sm hover:scale-110 focus:outline-none focus:ring-1 focus:ring-[#f85149]"
+                            title={`${incident.serverName} – ${incident.timestamp.toLocaleString()}`}
+                            onClick={() => setSelectedIncident(incident)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {/* label only under days with incidents to avoid clutter */}
+                    <span className="mt-1 text-[#8b949e]">
+                      {formatDayLabel(date)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-[#8b949e]">
-        Each vertical line represents a day with incidents; each red dot is a
-        single incident on that day.
-      </p>
-
-      {/* details panel when a dot is clicked */}
+      {/* details panel on dot click */}
       {selectedIncident && (
         <div className="mt-4 rounded-lg border border-[#30363d] bg-[#0d1117] p-4">
           <div className="flex items-start justify-between gap-4">
@@ -93,7 +98,6 @@ export function IncidentTimeline({ incidents }: IncidentTimelineProps) {
               <p className="text-xs text-[#8b949e]">
                 {selectedIncident.timestamp.toLocaleString()}
               </p>
-
               <p className="mt-3 text-xs font-semibold text-[#c9d1d9]">
                 Incident details
               </p>
@@ -141,7 +145,42 @@ function dayKey(d: Date): string {
   ].join("-");
 }
 
+function getLastNDays(n: number): Date[] {
+  const days: Date[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    days.push(d);
+  }
+  return days;
+}
+
+function groupIncidentsByDay(incidents: Incident[]): Map<string, Incident[]> {
+  const map = new Map<string, Incident[]>();
+
+  for (const incident of incidents) {
+    const d = new Date(incident.timestamp);
+    d.setHours(0, 0, 0, 0);
+    const key = dayKey(d);
+
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(incident);
+  }
+
+  // keep per-day incidents in time order
+  map.forEach((list) =>
+    list.sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+  );
+
+  return map;
+}
+
 function formatDayLabel(d: Date): string {
-  // e.g. "11/22"
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
