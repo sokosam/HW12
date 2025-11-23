@@ -11,6 +11,8 @@ const historicalIncidents = [
   {
     daysAgo: 0,
     containerName: "worker-pool-01",
+    agentId: 3,
+    serviceName: "Job Processing Service",
     errorMessage: "[Today] Panic: out of memory in job executor",
     explaination: "Worker pool crashed due to an OOM condition.",
     suggestedFix: "Increase memory limits and add queue backpressure.",
@@ -19,6 +21,8 @@ const historicalIncidents = [
   {
     daysAgo: 1,
     containerName: "api-gateway-01",
+    agentId: 7,
+    serviceName: "API Gateway Service",
     errorMessage: "[Day 1] Elevated 5xx errors during deployment window.",
     explaination: "API gateway had a brief outage during rollout.",
     suggestedFix: "Use blue/green deployments to avoid downtime.",
@@ -27,6 +31,8 @@ const historicalIncidents = [
   {
     daysAgo: 3,
     containerName: "db-cluster-01",
+    agentId: 2,
+    serviceName: "Database Service",
     errorMessage: "[Day 3] Slow queries due to missing index.",
     explaination: "Heavy reports caused contention on an unindexed column.",
     suggestedFix: "Add proper indexes and tune slow queries.",
@@ -35,6 +41,8 @@ const historicalIncidents = [
   {
     daysAgo: 7,
     containerName: "auth-service-02",
+    agentId: 5,
+    serviceName: "Authentication Service",
     errorMessage: "[Day 7] Token validation failures for mobile clients.",
     explaination: "JWT library upgrade caused incompatible token parsing.",
     suggestedFix: "Roll back library and add compatibility tests.",
@@ -43,6 +51,8 @@ const historicalIncidents = [
   {
     daysAgo: 15,
     containerName: "api-gateway-01",
+    agentId: 1,
+    serviceName: "API Gateway Service",
     errorMessage: "[Day 15] Sudden spike in 429 rate-limits.",
     explaination: "Upstream service degraded, causing cascading throttling.",
     suggestedFix: "Introduce circuit breaker and better fallbacks.",
@@ -51,6 +61,8 @@ const historicalIncidents = [
   {
     daysAgo: 30,
     containerName: "db-cluster-01",
+    agentId: 4,
+    serviceName: "Database Service",
     errorMessage: "[Day 30] Replication lag exceeded 10 minutes.",
     explaination: "Long-running ETL jobs overloaded replica.",
     suggestedFix: "Move heavy jobs to a dedicated reporting replica.",
@@ -59,6 +71,8 @@ const historicalIncidents = [
   {
     daysAgo: 45,
     containerName: "worker-pool-01",
+    agentId: 8,
+    serviceName: "Job Processing Service",
     errorMessage: "[Day 45] Worker restart loop detected.",
     explaination: "Bad config caused workers to exit immediately.",
     suggestedFix: "Add config validation and safe defaults.",
@@ -67,6 +81,8 @@ const historicalIncidents = [
   {
     daysAgo: 60,
     containerName: "db-cluster-01",
+    agentId: 6,
+    serviceName: "Database Service",
     errorMessage: "[Day 60] Backup job starved I/O.",
     explaination: "Nightly backup overlapped with traffic peak.",
     suggestedFix: "Reschedule backups and throttle I/O.",
@@ -75,6 +91,8 @@ const historicalIncidents = [
   {
     daysAgo: 70,
     containerName: "worker-pool-01",
+    agentId: 2,
+    serviceName: "Job Processing Service",
     errorMessage: "[Day 70] Crash loop due to uncaught exception.",
     explaination: "Unhandled error in job handler crashed workers.",
     suggestedFix: "Patch handler and add error boundaries.",
@@ -83,6 +101,8 @@ const historicalIncidents = [
   {
     daysAgo: 89,
     containerName: "auth-service-02",
+    agentId: 3,
+    serviceName: "Authentication Service",
     errorMessage: "[Day 89] Stale configuration cache.",
     explaination: "Config updates weren't propagated to all nodes.",
     suggestedFix: "Fix cache invalidation and add health checks.",
@@ -133,6 +153,8 @@ async function seedHistoricalIncidents() {
 
       await db.insert(schema.errors).values({
         containerId,
+        agentId: incident.agentId,
+        serviceName: incident.serviceName,
         errorMessage: incident.errorMessage,
         explaination: incident.explaination,
         suggestedFix: incident.suggestedFix,

@@ -55,6 +55,8 @@ export const errors = createTable("error", (d) => ({
     .integer()
     .notNull()
     .references(() => containers.id, { onDelete: "cascade" }),
+  agentId: d.integer().notNull(),
+  serviceName: d.varchar({ length: 256 }).notNull(),
   errorMessage: d.varchar({ length: 1024 }).notNull(),
   explaination: d.varchar({ length: 2048 }).notNull(),
   suggestedFix: d.varchar({ length: 2048 }).notNull(),

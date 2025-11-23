@@ -6,6 +6,8 @@ import * as schema from "~/server/db/schema";
 
 const ingestPayload = z.object({
   containerId: z.number().int().positive(),
+  agentId: z.number().int().min(1).max(8).optional(),
+  serviceName: z.string().min(1).optional(),
   errorMessage: z.string().min(1).optional(),
   explanation: z.string().min(1).optional(),
   suggestedFix: z.string().min(1).optional(),
@@ -24,6 +26,8 @@ export async function POST(request: Request) {
 
     await db.insert(schema.errors).values({
       containerId: payload.containerId,
+      agentId: payload.agentId ?? payload.containerId,
+      serviceName: payload.serviceName ?? "Unknown Service",
       errorMessage:
         payload.errorMessage ??
         payload.errorLogs ??
