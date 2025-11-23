@@ -75,6 +75,55 @@ export default function DashboardPage() {
   const { isConnected } = useDataUpdates(handleUpdate);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch servers
+        const serversRes = await fetch("/api/servers");
+        if (!serversRes.ok) throw new Error("Failed to fetch servers");
+        const serversData = await serversRes.json();
+        setServers(serversData);
+
+        // Fetch errors/incidents
+        try {
+          const errorsRes = await fetch("/api/error");
+          if (!errorsRes.ok) {
+            const errorData = await errorsRes.json().catch(() => ({}));
+            console.error("Error API response:", errorsRes.status, errorData);
+            throw new Error(
+              `Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`,
+            );
+          }
+          const errorsData = await errorsRes.json();
+
+          // Transform errors to incidents format (matching database schema)
+          const incidentsData: Incident[] = errorsData.map((error: any) => ({
+            id: error.id?.toString() ?? "unknown",
+            serverId: error.containerId?.toString() ?? "unknown",
+            serverName: error.serviceName ?? "Unknown server",
+            timestamp: new Date(error.occurredAt),
+            logs: error.errorMessage ?? "",
+            aiSummary: error.explaination ?? "",
+            aiFix: error.suggestedFix ?? "",
+            resolved: error.resolved ?? false,
+          }));
+
+          setIncidents(incidentsData);
+        } catch (errorErr) {
+          console.error("Error fetching incidents:", errorErr);
+          // Set empty array instead of breaking the whole page
+          setIncidents([]);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err instanceof Error ? err.message : "Failed to load data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchData();
   }, [fetchData]);
 
@@ -149,7 +198,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-[#8b949e]">
-                Active Servers
+                Active Agents
               </p>
               <p className="text-2xl font-semibold text-[#f0f6fc]">
                 {activeServers}
@@ -302,7 +351,7 @@ export default function DashboardPage() {
           <div className="border-b border-[#30363d] px-6 py-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#f0f6fc]">
-                Active Servers
+                Active Agents
               </h2>
               <Link
                 href="/servers"

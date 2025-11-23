@@ -57,9 +57,9 @@ export const errors = createTable("error", (d) => ({
     .notNull()
     .references(() => containers.id, { onDelete: "cascade" }),
   serviceName: d.varchar({ length: 256 }).default("unknown").notNull(),
-  errorMessage: d.varchar({ length: 1024 }).notNull(),
-  explaination: d.varchar({ length: 2048 }).notNull(),
-  suggestedFix: d.varchar({ length: 2048 }).notNull(),
+  errorMessage: d.varchar({ length: 4096 }).notNull(),
+  explaination: d.varchar({ length: 4096 }).notNull(),
+  suggestedFix: d.varchar({ length: 4096 }).notNull(),
   resolved: d.boolean().default(false).notNull(),
   resolvedAt: d.timestamp({ withTimezone: true }),
   occurredAt: d
@@ -79,4 +79,3 @@ export const users = createTable("user", (d) => ({
     .notNull(),
 }));
 // User and organization tables might not be necessary lets wait for clerk auth implementation first
-
